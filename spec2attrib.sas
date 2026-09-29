@@ -251,7 +251,7 @@ quit;
     informat _all_;
   run;
 
-  ** SAS to fire a warning if length of value is longer than length of variable;
+  ** SAS to fire a warning when a character variable is shortened;
   options varlenchk=warn;
   ** SAS to fire an error if SAS cannot find a format;
   options fmterr;
