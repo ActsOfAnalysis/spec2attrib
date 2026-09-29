@@ -113,6 +113,8 @@ run;
  
 data __meta__01;
   set __meta__variable(keep=VARIABLE_NAME VARIABLE_LABEL KEY_SEQUENCE TYPE LENGTH FORMAT);
+  ** make sure the duplicate check is not case-sensitive;
+  VARIABLE_NAME = upcase(strip(VARIABLE_NAME));
   ORDER=_n_;
 run;
 
