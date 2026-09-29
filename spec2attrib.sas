@@ -43,7 +43,18 @@
 %macro spec2attrib(SPEC=, DOMAIN=, WHERE=1=1, IN=, OUT=, DEBUG=N);
 
 %global var_all var_sort ds_label;
+%local opt_save;
 
+** Save the calling session settings of all system options changed by this macro;
+** They are restored at the end of the macro, including after an early exit on error;
+%let opt_save=%sysfunc(getoption(validvarname,keyword))
+  %sysfunc(getoption(validmemname,keyword))
+  %sysfunc(getoption(varlenchk,keyword))
+  %sysfunc(getoption(fmterr))
+  %sysfunc(getoption(mprint))
+  %sysfunc(getoption(mlogic))
+  %sysfunc(getoption(symbolgen));
+  
 %let var_all=;
 %let var_sort=;
 %let ds_label=;
@@ -232,7 +243,7 @@ quit;
   %end;
 
   ** Read IN dataset and remove existing formats;
-        ** keep &var_all let SAS fire a warning if variable in spec does not exist in IN dataset;
+  ** keep &var_all let SAS fire a warning if variable in spec does not exist in IN dataset;
   data __meta__in;
     set &IN;
     keep &var_all;
@@ -240,12 +251,7 @@ quit;
     informat _all_;
   run;
 
-  ** Obtain the default setting of VARLENCHK;
-  %let varlenchk_df=%sysfunc(getoption(varlenchk));
-  ** Obtain the default setting of FMTERR;
-  %let fmterr_df=%sysfunc(getoption(fmterr));
-
-        ** SAS to fire a warning if length of value is longer than length of variable;
+  ** SAS to fire a warning if length of value is longer than length of variable;
   options varlenchk=warn;
   ** SAS to fire an error if SAS cannot find a format;
   options fmterr;
@@ -262,9 +268,6 @@ quit;
             by &var_sort;
           run;
         %end;
-  ** switch back to default;
-  options varlenchk=&varlenchk_df &fmterr_df;
-
 %end;
 %else %put ERROR: (&SYSMACRONAME) No specification is found for domain &DOMAIN..;
 
@@ -288,7 +291,9 @@ quit;
 %end;
 
 %exit:
- 
+** Restore the calling session option settings;
+options &opt_save;
+
 %mend spec2attrib;
 
 
